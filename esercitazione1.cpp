@@ -2,9 +2,18 @@
 #include <fstream>
 #include <string>
 using namespace std;
-int main()
+int main(int argc,const char*argv[])
 {
-    ifstream file1("testoes1.txt");
+    if(argc<2){
+        cerr<<"c'e stato un errore"<<endl;
+        return 1;
+    }
+    
+    
+    string nomefile=argv[1];
+    
+    
+    ifstream file1(nomefile);
     if (file1.is_open()){
         double media, somma=0;// ci sono 4 misure per citta non serve il cont
         string citta="";
@@ -16,11 +25,16 @@ int main()
             }
             media=somma/4;
             somma=0;
-            cout<<"la temperatura media di "<<citta<<" è "<<+media<<endl;
+            cout<<"la temperatura media di "<<citta<<" e "<<+media<<endl;
             
             
             
         }
     }
-   
+else{
+		cerr<<"c'e stato un errore"<<endl;
+        return 1;
+	}
+
 }
+
