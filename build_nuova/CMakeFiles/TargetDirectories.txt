@@ -1,4 +1,0 @@
-C:/msys64/home/Andrea/esercitazione-0/build_nuova/CMakeFiles/stampa_parametri.dir
-C:/msys64/home/Andrea/esercitazione-0/build_nuova/CMakeFiles/calcola_medie.dir
-C:/msys64/home/Andrea/esercitazione-0/build_nuova/CMakeFiles/edit_cache.dir
-C:/msys64/home/Andrea/esercitazione-0/build_nuova/CMakeFiles/rebuild_cache.dir

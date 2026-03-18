@@ -1,3 +1,0 @@
-C:\msys64\ucrt64\bin\cmake.exe -E rm -f CMakeFiles\calcola_medie.dir/objects.a
-C:\msys64\ucrt64\bin\ar.exe qc CMakeFiles\calcola_medie.dir/objects.a @CMakeFiles\calcola_medie.dir\objects1.rsp
-C:\msys64\ucrt64\bin\c++.exe  -Wall -Wshadow -Wl,--whole-archive CMakeFiles\calcola_medie.dir/objects.a -Wl,--no-whole-archive -o calcola_medie.exe -Wl,--out-implib,libcalcola_medie.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\calcola_medie.dir\linkLibs.rsp

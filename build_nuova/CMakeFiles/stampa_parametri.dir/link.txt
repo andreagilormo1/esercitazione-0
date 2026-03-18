@@ -1,3 +1,0 @@
-C:\msys64\ucrt64\bin\cmake.exe -E rm -f CMakeFiles\stampa_parametri.dir/objects.a
-C:\msys64\ucrt64\bin\ar.exe qc CMakeFiles\stampa_parametri.dir/objects.a @CMakeFiles\stampa_parametri.dir\objects1.rsp
-C:\msys64\ucrt64\bin\c++.exe  -Wall -Wshadow -Wl,--whole-archive CMakeFiles\stampa_parametri.dir/objects.a -Wl,--no-whole-archive -o stampa_parametri.exe -Wl,--out-implib,libstampa_parametri.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\stampa_parametri.dir\linkLibs.rsp
