@@ -1,174 +1,189 @@
 #include <iostream>
+#include <concepts>
+
 using namespace std;
 
 template<typename I> requires std::integral<I>
- class rational {
- I num;
- I den;
- int con=1;
+// 0/0= nan num/0=inf
+// da qui fino al avviso scritto senza uso del ia
+class rational {
+I num;
+I den;
+int con=1;
 public:
 rational(){
-     num=0;
-     den=1;
- }
- rational(I n, I d){
-     num=n;
-     den=d;
- }
- void controllo(){
-     if (den==0){
-         con=0;
-         if(num==0){
-             cout<<"nan"<<endl;
-         }
-         else{
-             cout<<"inf"<<endl;
-         }
-     }
- }
- void semplifica(){
-     if (con!=0){
-         int mcd=1;
-         if(num==0){
-             den=1;
-             
-         }
-         else{
-             
-         
-         for(int k=1;k<=abs(num);k++){
-             if(num%k==0 &&den%k==0){
-                 mcd=k;
-             }
-         }
-         num=num/mcd;
-         den=den/mcd;
-         } 
-     }
- }
- I denominatore(){
-     return den;
- }
- 
- I numeratore (){
-     return num;
- }
- 
- // ausilio di intelizenza artificiale per i metodi sulle operazioni
- 
-rational somma(rational altro) {
+num=0;
+den=1;
+}
+rational(I n, I d){
+num=n;
+den=d;
+}
+void controllo(){
+if (den==0){
+con=0;
+}
+else {
+con=1;
+}
+}
+void semplifica(){
+if (con!=0){
+int mcd=1;
+if(num==0){
+den=1;
+}
+else{
+for(int k=1;k<=abs(num);k++){
+if(num%k==0 && den%k==0){
+mcd=k;
+}
+}
+num=num/mcd;
+den=den/mcd;
+}
+}
+}
+I denominatore() const {
+return den;
+}
+
+I numeratore () const {
+return num;
+}
+
+// ausilio di intelizenza artificiale per i metodi sulle operazioni
+
+rational& operator+=(const rational& altro) {
 if (con == 0 || altro.con == 0) {
-I n = 0;
-if ((num == 0 && den == 0) || (altro.num == 0 && altro.den == 0)) n = 0;
-else n = num + altro.num;
-rational ris(n, 0);
-return ris;
+if ((num == 0 && den == 0) || (altro.num == 0 && altro.den == 0)) {
+num = 0;
 }
-I n = (num * altro.den) + (altro.num * den);
-I d = den * altro.den;
-rational ris(n, d);
-ris.semplifica();
-return ris;
+else {
+num = num + altro.num;
+}
+den = 0;
+con = 0;
+return *this;
+}
+num = (num * altro.den) + (altro.num * den);
+den = den * altro.den;
+semplifica();
+return *this;
 }
 
-rational sottrazione(rational altro) {
+rational& operator-=(const rational& altro) {
 if (con == 0 || altro.con == 0) {
-I n = 0;
-if ((num == 0 && den == 0) || (altro.num == 0 && altro.den == 0)) n = 0;
-else n = num - altro.num;
-rational ris(n, 0);
-return ris;
+if ((num == 0 && den == 0) || (altro.num == 0 && altro.den == 0)) {
+num = 0;
 }
-I n = (num * altro.den) - (altro.num * den);
-I d = den * altro.den;
-rational ris(n, d);
-ris.semplifica();
-return ris;
+else {
+num = num - altro.num;
+}
+den = 0;
+con = 0;
+return *this;
+}
+num = (num * altro.den) - (altro.num * den);
+den = den * altro.den;
+semplifica();
+return *this;
 }
 
-rational moltiplicazione(rational altro) {
+rational& operator*=(const rational& altro) {
 if (con == 0 || altro.con == 0) {
-I n = 0;
-if ((num == 0 && den == 0) || (altro.num == 0 && altro.den == 0)) n = 0;
-else n = num * altro.num;
-rational ris(n, 0);
-return ris;
+num = num * altro.num;
+den = 0;
+con = 0;
 }
-I n = num * altro.num;
-I d = den * altro.den;
-rational ris(n, d);
-ris.semplifica();
-return ris;
+else {
+num = num * altro.num;
+den = den * altro.den;
+semplifica();
+}
+return *this;
 }
 
-rational divisione(rational altro) {
+rational& operator/=(const rational& altro) {
 if (con == 0 || altro.con == 0) {
-I n = 0;
-if ((num == 0 && den == 0) || (altro.num == 0 && altro.den == 0)) n = 0;
-else n = num * altro.den;
-rational ris(n, 0);
+num = num * altro.den;
+den = 0;
+con = 0;
+}
+else {
+num = num * altro.den;
+den = den * altro.num;
+semplifica();
+controllo();
+}
+return *this;
+}
+
+rational operator+(const rational& altro) const {
+rational ris = *this;
+ris += altro;
 return ris;
 }
-I n = num * altro.den;
-I d = den * altro.num;
-rational ris(n, d);
-ris.semplifica();
+
+rational operator-(const rational& altro) const {
+rational ris = *this;
+ris -= altro;
 return ris;
 }
 
+rational operator*(const rational& altro) const {
+rational ris = *this;
+ris *= altro;
+return ris;
+}
 
+rational operator/(const rational& altro) const {
+rational ris = *this;
+ris /= altro;
+return ris;
+}
 
+};
+// uso ia per questo metodo
+template<typename I>
+std::ostream& operator<<(std::ostream& os, const rational<I>& r) {
+if (r.denominatore() == 0) {
+if (r.numeratore() == 0) {
+os << "nan";
+}
+else {
+os << "inf";
+}
+}
+else {
+os << r.numeratore() << "/" << r.denominatore();
+}
+return os;
+}
 
- 
- 
- };
-
-
+// scritto tutto da me
 int main (){
-    int n,d,num,den;
-    cout<<"inserire n"<<endl;
-    cin>>n;
-    cout<<"inserire d"<<endl;
-    cin>>d;
-    rational <int> oggetto(n,d);
-    oggetto.controllo();
-    oggetto.semplifica();
-    cout<<"inserire n"<<endl;
-    cin>>n;
-    cout<<"inserire d"<<endl;
-    cin>>d;
-    rational <int> oggetto2(n,d);
-    oggetto2.controllo();
-    oggetto2.semplifica();
-    
-    // ausilio di inteligenza artificiale da qui
-    rational<int> ris_somma = oggetto.somma(oggetto2);
-cout << "Somma: ";
-if (ris_somma.denominatore() == 0){
-    
- ris_somma.controllo();}
-else{ cout << ris_somma.numeratore() << "/" << ris_somma.denominatore() << endl;}
+int n,d;
+cout<<"inserire n"<<endl;
+cin>>n;
+cout<<"inserire d"<<endl;
+cin>>d;
+rational <int> oggetto(n,d);
+oggetto.controllo();
+oggetto.semplifica();
+cout<<"inserire n"<<endl;
+cin>>n;
+cout<<"inserire d"<<endl;
+cin>>d;
+rational <int> oggetto2(n,d);
+oggetto2.controllo();
+oggetto2.semplifica();
 
-rational<int> ris_sott = oggetto.sottrazione(oggetto2);
-cout << "Sottrazione: ";
-if (ris_sott.denominatore() == 0){ ris_sott.controllo();}
-else{ cout << ris_sott.numeratore() << "/" << ris_sott.denominatore() << endl;}
+cout << "Somma: " << oggetto + oggetto2 << endl;
+cout << "Sottrazione: " << oggetto - oggetto2 << endl;
+cout << "Moltiplicazione: " << oggetto * oggetto2 << endl;
+cout << "Divisione: " << oggetto / oggetto2 << endl;
 
-rational<int> ris_molt = oggetto.moltiplicazione(oggetto2);
-cout << "Moltiplicazione: ";
-if(ris_molt.denominatore() == 0) {ris_molt.controllo();}
-else { cout << ris_molt.numeratore() << "/" << ris_molt.denominatore() << endl;}
-
-rational<int> ris_div = oggetto.divisione(oggetto2);
-cout << "Divisione: ";
-if (ris_div.denominatore() == 0){ris_div.controllo();}
-else {cout << ris_div.numeratore() << "/" << ris_div.denominatore() << endl;}
-
-
-
-    
-
-    
-    
-    return 0;
+return 0;
 }
+
