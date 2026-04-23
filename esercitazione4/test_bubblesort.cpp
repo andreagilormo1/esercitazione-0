@@ -2,6 +2,7 @@
 #include "randfiller.h"
 #include <vector>
 #include "my_sorts.hpp" 
+#include <string> 
 using namespace std;
 int main()
 {
@@ -24,5 +25,18 @@ int main()
     
        
    }
+   // parte in cui verifico che funziona anche con le stringe 
+   //stampando e vedendo se è ordinato (l'altra volta non l'ho letto quindi lo aggiungo ora)
+   vector <string> nomi (13);
+   nomi={"luca","andrea","alessandro","laura","francesco","gabriele",
+   "lisa","giulia","aurora","riccardo","edoardo","federico","matteo"};
+   bubble_sort(nomi);
+   for (int i=0;i<13;i++){
+       cout<<nomi[i]<<endl;
+   }
    return EXIT_SUCCESS;
-}
+   
+   
+   
+   
+} 
