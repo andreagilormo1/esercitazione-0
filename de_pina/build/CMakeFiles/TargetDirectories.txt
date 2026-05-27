@@ -1,0 +1,3 @@
+C:/msys64/home/Andrea/esercitazione-0/de_pina/build/CMakeFiles/de_pina.dir
+C:/msys64/home/Andrea/esercitazione-0/de_pina/build/CMakeFiles/edit_cache.dir
+C:/msys64/home/Andrea/esercitazione-0/de_pina/build/CMakeFiles/rebuild_cache.dir

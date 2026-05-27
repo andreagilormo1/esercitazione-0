@@ -8,4 +8,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow -Werror=vla -Wno-sign-com
 
 set(SRC_GRADIENTE main.cpp)
 
-add_executable(test_gradiente ${SRC_GRADIENTE})
+add_executable(de_pina ${SRC_GRADIENTE})
