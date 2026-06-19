@@ -3,6 +3,7 @@
 #include <map>
 #include <queue>
 #include <algorithm>
+#include <utility>
 
 using namespace std;
 
@@ -32,51 +33,68 @@ class DePina {
             //Per ogni arco nel grafo prendo i suoi nodi e creo dist e padre
             int u = e_test.from(); 
             int v = e_test.to();
-            map<int, double> dist;
-            map<int, unidirected_edge> padre;
+            
+            // Per il grafo sdoppiato la mappa collega uno stato {nodo, parità} alla sua distanza o al suo padre
+            map<pair<int, int>, double> dist;
+            map<pair<int, int>, pair<pair<int, int>, unidirected_edge>> padre;
+            
             //Questa riga è stata inizializzata con l'ausilio di IA 
-            priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq; //greater permette di considerare i pesi minori come prioritari
+            priority_queue<pair<double, pair<int, int>>, vector<pair<double, pair<int, int>>>, greater<pair<double, pair<int, int>>>> pq; //greater permette di considerare i pesi minori come prioritari
+            
             //Operazioni di inizializzazione
             for (int n : grafo.all_nodes()){
-            dist[n] = 1e9;
-            dist[u] = 0;
-            pq.push({0.0, u});
+                dist[{n, 0}] = 1e9;
+                dist[{n, 1}] = 1e9;
             }
+            
+            dist[{u, 0}] = 0.0;
+            pq.push({0.0, {u, 0}});
 
             while (!pq.empty()) {
-                auto [d, curr] = pq.top(); //Mi restituisce il nodo e la sua distanza che è la minore
+                auto [d, stato_curr] = pq.top(); //Mi restituisce il nodo e la sua distanza che è la minore
                 pq.pop(); //E poi qua li tolgo
-                if (d > dist[curr]) {
+                
+                auto [curr, par] = stato_curr;
+                if (d > dist[{curr, par}]) {
                     continue;
                 }
 
                 for (int vicino : grafo.neighhours(curr)) {
                     unidirected_edge e_vicino(curr, vicino); //Arco che contiene quello vicino
                     if (e_vicino == e_test){
-                        
                      continue;
                     }
-                    if (dist[curr] + peso.at(e_vicino) < dist[vicino]) {
-                        dist[vicino] = dist[curr] + peso.at(e_vicino);
-                        padre[vicino] = e_vicino;
-                        pq.push({dist[vicino], vicino});
+                    
+                    int in_S = S.count(e_vicino) ? 1 : 0;
+                    int prox_par = par ^ in_S; // Cambio di parità logica tramite XOR, abbiamo cercato come farla su internet
+
+                    if (dist[{curr, par}] + 1.0 < dist[{vicino, prox_par}]) {
+                        dist[{vicino, prox_par}] = dist[{curr, par}] + 1.0;
+                        padre[{vicino, prox_par}] = {{curr, par}, e_vicino};
+                        pq.push({dist[{vicino, prox_par}], {vicino, prox_par}});
                     }
                 }
             }
-            if (dist[v] < 1e9) {
+            
+            int delta = S.count(e_test) ? 1 : 0;
+            int par_obiettivo = 1 - delta;
+
+            if (dist[{v, par_obiettivo}] < 1e9) {
                 set<unidirected_edge> ciclo_corr = {e_test};
-                int curr = v; 
-                double costo = peso.at(e_test);
+                pair<int, int> stato_corr = {v, par_obiettivo};
+                
+                double costo = dist[{v, par_obiettivo}] + 1.0;
+                
                 //Questo ciclo while è stato implementato con l'ausilio di IA per adattare la ricerca del minimo alla nostra 
                 //classe di grafi non orientati, infatti per trovare il nodo precedente al nodo corrente, 
                 //devo controllare se l'arco padre va da curr a vicino o da vicino a curr, e in base a questo aggiornare curr
-                while (curr != u) {
-                    unidirected_edge e_p = padre[curr];
+                while (stato_corr != make_pair(u, 0)) {
+                    auto [stato_prec, e_p] = padre[stato_corr];
                     ciclo_corr.insert(e_p);
-                    costo += peso.at(e_p);
-                    curr = (e_p.from() == curr) ? e_p.to() : e_p.from();
+                    stato_corr = stato_prec;
                 }
-                if (prodotto_scalare(ciclo_corr, S) == 1 && costo < min_costo) {
+                
+                if (costo < min_costo) {
                     min_costo = costo;
                     ciclo_ottimo = ciclo_corr;
                 }
@@ -93,21 +111,21 @@ public:
         queue<int> q;
         
         if (grafo.all_nodes().empty()){
-            
          return risultato_nodi;
         }
 
-        int radice = *grafo.all_nodes().begin(); //Valore dell'indirizzo del nodo iniziale 
-        q.push(radice);
-        visitati.insert(radice);
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-            for (int v : grafo.neighhours(u)) {
-                if (visitati.find(v) == visitati.end()) {
-                    visitati.insert(v); 
-                    albero.insert(unidirected_edge(u, v)); 
-                    q.push(v);
+        for (int radice : grafo.all_nodes()) {
+            if (visitati.find(radice) == visitati.end()) { 
+                q.push(radice);
+                visitati.insert(radice);
+                while (!q.empty()) {
+                    int u = q.front();
+                    q.pop();
+                    for (int v : grafo.neighhours(u)) {
+                        if (visitati.find(v) == visitati.end()) {
+                            visitati.insert(v); albero.insert(unidirected_edge(u, v)); q.push(v);
+                        }
+                    }
                 }
             }
         }
@@ -118,21 +136,18 @@ public:
         vector<unidirected_edge> co_albero;
         for (const auto& e : grafo.all_edges()) {
             if (albero.find(e) == albero.end()){
-                
              co_albero.push_back(e);
             }
         }
 
         vector<set<unidirected_edge>> S(co_albero.size());
         for (size_t i = 0; i < co_albero.size(); ++i){
-            
          S[i].insert(co_albero[i]);
         }
 
         for (size_t i = 0; i < co_albero.size(); ++i) {
             set<unidirected_edge> C_i = trova_ciclo_minimo(grafo, peso, S[i]);
             if (C_i.empty()){
-                
              continue;
             }
 
@@ -148,27 +163,17 @@ public:
             int curr = nodi_ciclo[0], pred = -1;
             do {
                 int prox = (adj[curr][0] != pred) ? adj[curr][0] : (adj[curr].size() > 1 ? adj[curr][1] : -1);
-                if (prox == -1) {
-                    break;
-                }
-                nodi_ciclo.push_back(prox); 
-                pred = curr; 
-                curr = prox;
+                if (prox == -1) break;
+                nodi_ciclo.push_back(prox); pred = curr; curr = prox;
             } while (curr != nodi_ciclo[0] && nodi_ciclo.size() <= C_i.size());
             risultato_nodi.push_back(nodi_ciclo);
 
             //Modifica dei vettori ortogonali S: scorriamo il co_albero attuale e per ogni ciclo minimo trovato, 
-            //se il ciclo condivide un numero dispari di archi con S[j], allora facciamo l'operazione di XOR tra S[j] e C_i, 
-            //che consiste nell'inserire in S[j] gli archi di C_i che non sono in S[j] e rimuovere da S[j] gli archi 
-            //di C_i che sono in S[j]
-            for (size_t j = i + 1; j < co_albero.size(); ++j) {
+            //se il ciclo condivide un numero dispari di archi con S[j], allora facciamo l'operazione di XOR tra S[j] e S_i
+            for (size_t j = i + 1; j < co_albero.size(); j++) {
                 if (prodotto_scalare(C_i, S[j]) == 1) {
-                    for (const auto& e : C_i) {
-                        if (S[j].count(e)) {
-                            S[j].erase(e); 
-                        } else {
-                            S[j].insert(e);
-                        }
+                    for (const auto& e : S[i]) {
+                        if (S[j].count(e)) S[j].erase(e); else S[j].insert(e);
                     }
                 }
             }
